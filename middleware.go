@@ -117,6 +117,9 @@ func defaultHeaders(next http.Handler) http.Handler {
 	})
 }
 
+
+const EtagParam = "etag"
+
 func setCacheHeaders(next http.Handler, ttl int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer next.ServeHTTP(w, r)
@@ -130,6 +133,11 @@ func setCacheHeaders(next http.Handler, ttl int) http.Handler {
 
 		w.Header().Add("Expires", strings.Replace(expires.Format(time.RFC1123), "UTC", "GMT", -1))
 		w.Header().Add("Cache-Control", getCacheControl(ttl))
+
+		etag := r.URL.Query().Get(EtagParam)	
+		if etag != "" {
+			w.Header().Add("Etag", etag)
+		}
 	})
 }
 
